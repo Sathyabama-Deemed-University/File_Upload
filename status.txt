@@ -1,0 +1,4 @@
+configuration_1 is completed
+configuration_2 is completed partially it works for every other test case other than xml test case 2 and test case 4
+get_config partially completed source code is yet to be updated
+get_logs partially completed source code is yet to be updated
