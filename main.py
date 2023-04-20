@@ -9,7 +9,7 @@ async def Validate_Configuration_1(file : UploadFile=File(...)):
     b_file= await file.read()
     
     validation=validifi.c1.verify(file.filename,b_file).func()
-    db=duckdb.connect('log.db')
+    db=duckdb.connect('logs.db')
     cursor=db.cursor()
     if type(validation) == bytes:
         cursor.execute("insert into logs values(?,?,?)",(file.filename,b_file,1))
@@ -25,7 +25,7 @@ async def Validate_Configuration_2(file : UploadFile=File(...)):
     b_file= await file.read()
     
     validation=validifi.c2.verify(file.filename,b_file).func()
-    db=duckdb.connect('log.db')
+    db=duckdb.connect('logs.db')
     cursor=db.cursor()
     if type(validation) == bytes:
         cursor.execute("insert into logs values(?,?,?)",(file.filename,b_file,1))
