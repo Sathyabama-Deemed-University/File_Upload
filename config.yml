@@ -1,0 +1,25 @@
+config:
+  unique_column: [[]]
+  date_format: ""
+  date_time_column: [[]]
+  mandatory_columns: [[]] #add multivalued columns subcolumns names here nested list
+  mandatory_column_dtypes: [[]] #add multivalued columns subcolumns datatypes here nested list
+  file_size_max_mb: 10
+  column_lenght: 20
+  xml_muti_valued_columns: []
+  xml_tables: []
+  xml_table_columns_dtypes: [] #nested list
+  xml_table_mandatory_column_dtypes: [] #nested list
+  supported_formats: csv,xlsx,xlsm,xml
+  Error:
+    column_lenght: "Column length greater"
+    file_type: "File type {} is not supported"
+    column_type: "Column type doesnt match"
+    file_size: "File size exceeded"
+    date_format: "{} Column Date Format is not valid pls change to {}"
+    mandatory_column: "Mandatory column not present"
+    unique_col: "{} Column is not unique"
+    corrupted file: "Unable to read file"
+    xml multivalued column: "multivalued column is not supported"
+    xml mutiple tables: "multiple tables is not supported or file is empty"
+    empty: "file is empty"

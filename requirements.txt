@@ -1,0 +1,10 @@
+pandas 
+polars 
+duckdb 
+fastapi 
+uvicorn 
+pyyaml
+python-multipart
+pyarrow
+openpyxl
+lxml
