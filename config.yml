@@ -6,10 +6,8 @@ config:
   mandatory_column_dtypes: [[]] #add multivalued columns subcolumns datatypes here nested list
   file_size_max_mb: 10
   column_lenght: 20
-  xml_muti_valued_columns: []
+  xml_muti_valued_columns: [[]] #nested list
   xml_tables: []
-  xml_table_columns_dtypes: [] #nested list
-  xml_table_mandatory_column_dtypes: [] #nested list
   supported_formats: csv,xlsx,xlsm,xml
   Error:
     column_lenght: "Column length greater"
