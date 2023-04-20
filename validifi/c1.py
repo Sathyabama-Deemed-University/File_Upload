@@ -12,7 +12,7 @@ class verify:
         self.filename = filename
         self.file_size_limit = file_size_limit * 1000000
         self.column_length = column_length
-        self.is_unique = True
+        
         self.dict_dtypes={'Int8': pl.Int8,
              'Int16': pl.Int16,
              'Int32':pl.Int32,
@@ -93,8 +93,7 @@ class verify:
     def csv_check(self):
         try:
             self.df = pl.read_csv(io.BytesIO(self.bdata))
-            if len(self.df) != len(self.df.unique()):
-                self.is_unique=False
+            
             self.df = self.df.unique()
             self.temp_df=self.df
         except pl.exceptions.NoDataError :
@@ -107,8 +106,7 @@ class verify:
         if self.df.shape[0] == 0:
             self.error = errors.empty_e
             return 0
-        if self.is_unique == False:
-           self.bdata = self.df.to_pandas().to_csv(index=False).encode()
+        
         if self._column_length():
             if self.check_mandatory_columns():
                 if self.check_date_format():
@@ -120,8 +118,7 @@ class verify:
     def xlsx_xlsm_check(self):
         try:
             self.df = pl.read_excel(io.BytesIO(self.bdata))
-            if len(self.df) != len(self.df.unique()):
-                self.is_unique=False
+            
             self.df = self.df.unique()
             self.temp_df=self.df
         except pl.exceptions.NoDataError :
@@ -168,8 +165,7 @@ class verify:
             
                 return 0
         
-        if self.is_unique == False:
-           self.bdata = self.xml.to_pandas().to_csv(index=False).encode()
+       
         if self._column_length():
             if self.check_mandatory_columns():
                 if self.check_date_format():
