@@ -3,6 +3,7 @@ import polars as pl
 import io
 from . import config
 from . import errors
+import base64
 
 class verify:
     def __init__(self,filename, bdata,unique_columns=config.unique_columns, date_format = config.date_format, date_time_column =config.date_time_column,
@@ -138,7 +139,7 @@ class verify:
                            temp_pointer=io.BytesIO()
                            self.bdata = self.df.to_pandas().to_excel(temp_pointer,index=False)
                            temp_pointer.seek(0)
-                           self.bdate=temp_pointer.read()
+                           self.bdata=base64.encodebytes(temp_pointer.read())
                            return 1
                             
         return 0
