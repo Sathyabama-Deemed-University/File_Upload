@@ -39,7 +39,7 @@ async def Validate_Configuration_2(file : UploadFile=File(...)):
 @app.post('/get_Configuration')
 async def Get_Configuration(file : UploadFile=File(...)):
     pass
-@app.post('/get_Logs')
+@app.get('/get_Logs')
 async def Get_Logs():
     db = duckdb.connect('logs.db')
     cursor = db.cursor()
