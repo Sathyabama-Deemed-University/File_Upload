@@ -162,10 +162,7 @@ class verify:
             
     def csv_check(self):
         try:
-            self.df = pl.read_csv(io.BytesIO(self.bdata))
-            if len(self.df) != len(self.df.unique()):
-                self.is_unique=False
-            self.df = self.df.unique()
+            self.df = pl.read_csv(io.BytesIO(self.bdata)).unique()
             self.temp_df=self.df
         except pl.exceptions.NoDataError :
                 self.error = errors.empty_e
@@ -188,9 +185,7 @@ class verify:
     
     def xlsx_xlsm_check(self):
         try:
-            self.df = pl.read_excel(io.BytesIO(self.bdata))
-            
-            self.df = self.df.unique()
+            self.df = pl.read_excel(io.BytesIO(self.bdata)).unique()
             self.temp_df=self.df
         except pl.exceptions.NoDataError :
                 self.error = errors.empty_e
@@ -211,7 +206,7 @@ class verify:
                            temp_pointer=io.BytesIO()
                            self.bdata = self.df.to_pandas().to_excel(temp_pointer,index=False)
                            temp_pointer.seek(0)
-                           self.bdate=temp_pointer.read()
+                           self.bdata=base64.encodebytes(temp_pointer.read())
                            return 1
         return 0
     
@@ -221,10 +216,7 @@ class verify:
             if self.df.isnull().sum().values.sum() == sum(self.df.shape):
                 self.error = errors.xml_mutiple_tables_e
                 return 0
-            self.df = pl.from_pandas(self.df)
-            if len(self.df) != len(self.df.unique()):
-                self.is_unique=False
-            self.df = self.df.unique()
+            self.df = pl.from_pandas(self.df).unique()
             self.temp_df=self.df
             
         except pl.exceptions.NoDataError :
