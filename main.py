@@ -12,11 +12,11 @@ async def Validate_Configuration_1(file : UploadFile=File(...)):
     db=duckdb.connect('logs.db')
     cursor=db.cursor()
     if type(validation) == bytes:
-        cursor.execute("insert into logs values(?,?,?)",(file.filename,b_file,1))
+        cursor.execute("insert into logs values(?,?)",(file.filename,1))
         cursor.commit()
         cursor.close()
         return {'status':1,'file':validation}
-    cursor.execute("insert into logs values(?,?,?)",(file.filename,b_file,validation))
+    cursor.execute("insert into logs values(?,?)",(file.filename,validation))
     db.commit()
     db.close()
     return {'status':0,'error':validation}
@@ -28,11 +28,11 @@ async def Validate_Configuration_2(file : UploadFile=File(...)):
     db=duckdb.connect('logs.db')
     cursor=db.cursor()
     if type(validation) == bytes:
-        cursor.execute("insert into logs values(?,?,?)",(file.filename,b_file,1))
+        cursor.execute("insert into logs values(?,?)",(file.filename,1))
         cursor.commit()
         cursor.close()
         return {'status':1,'file':validation}
-    cursor.execute("insert into logs values(?,?,?)",(file.filename,b_file,validation))
+    cursor.execute("insert into logs values(?,?)",(file.filename,validation))
     db.commit()
     db.close()
     return {'status':0,'error':validation}
@@ -41,7 +41,10 @@ async def Get_Configuration(file : UploadFile=File(...)):
     pass
 @app.post('/get_Logs')
 async def Get_Logs():
-    pass
+    db = duckdb.connect('logs.db')
+    cursor = db.cursor()
+    File = validifi.get_logs.get_logs().func(cursor)
+    return {'file':File}
 
    
 
