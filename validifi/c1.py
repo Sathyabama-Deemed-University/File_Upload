@@ -12,7 +12,7 @@ class verify:
         self.bdata = bdata
         self.filename = filename
         self.file_size_limit = file_size_limit * 1000000
-        self.column_length = column_length
+        self.column_length = column_length[0]
         
         self.dict_dtypes={'Int8': pl.Int8,
              'Int16': pl.Int16,
