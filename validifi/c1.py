@@ -8,7 +8,7 @@ import base64
 class verify:
     def __init__(self,filename, bdata,unique_columns=config.unique_columns, date_format = config.date_format, date_time_column =config.date_time_column,
                  mandatory_column_dtypes=config.mandatory_column_dtypes,mandatory_columns=config.mandatory_columns, file_size_limit=config.file_size_max_mb,
-                 column_length=20 ):
+                 column_length=config.column_lenght ):
         self.bdata = bdata
         self.filename = filename
         self.file_size_limit = file_size_limit * 1000000
