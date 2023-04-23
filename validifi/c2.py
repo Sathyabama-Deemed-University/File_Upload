@@ -242,11 +242,9 @@ class verify:
             self.temp_df=self.df
             
         except pl.exceptions.NoDataError :
-                self.error = errors.empty_e
-                return 0
-        except Exception as e :
-           
-            
+            self.error = errors.empty_e
+            return 0
+        except :
             self.error = errors.corrupted_file_e
             return 0
         self.get_multivalued_cols(list_index)
