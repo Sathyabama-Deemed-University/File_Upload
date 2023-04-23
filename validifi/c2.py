@@ -130,28 +130,7 @@ class verify:
                     return 0
         return 1
     
-    def remove_multivalued_col_tags(self,bdata,col_name):
-        
-        string_data = bdata.replace(f'<{col_name}>'.encode(),b"")
-        string_data = string_data.replace(f'</{col_name}>'.encode(),b"")
-       
-        return string_data
-    def get_multivalued_cols(self,list_index):
-        self.multivalued_cols = []
-        for i in self.df.columns:
-            if self.df[i].unique()[0] == None and len(self.df[i].unique()) <= 1:
-                self.multivalued_cols.append(i)
-        self.multivalued_cols = list(set(self.multivalued_cols)-set(self.xml_multivalued_columns[list_index]))
-        for i in self.multivalued_cols:
-            self.bdata = self.remove_multivalued_col_tags(self.bdata,i)
-        return 1
-    def check_multivalued_cols(self,bdata,list_index=0):
-        self.bdata=bdata
-        for i in self.xml_multivalued_columns[list_index]:
-        
-            self.bdata = self.remove_multivalued_col_tags(self.bdata,i)
-            
-        return 1
+    
     def _column_length(self,listindex=0):
         if len(self.df.columns) <= self.column_length[listindex]:
             return 1
@@ -222,6 +201,32 @@ class verify:
                            self.bdata=base64.encodebytes(temp_pointer.read())
                            return 1
         return 0
+    def remove_multivalued_col_tags(self,bdata,col_name):
+        
+        string_data = bdata.replace(f'<{col_name}>'.encode(),b"")
+        string_data = string_data.replace(f'</{col_name}>'.encode(),b"")
+       
+        return string_data
+    def get_multivalued_cols(self,list_index):
+        self.multivalued_cols = []
+        for i in self.df.columns:
+            if self.df[i].unique()[0] == None and len(self.df[i].unique()) <= 1:
+                self.multivalued_cols.append(i)
+        self.multivalued_cols = list(set(self.multivalued_cols)-set(self.xml_multivalued_columns[list_index]))
+        for i in self.multivalued_cols:
+            self.bdata = self.remove_multivalued_col_tags(self.bdata,i)
+        return 1
+    def check_multivalued_cols(self,bdata,list_index=0):
+        self.bdata=bdata
+        for i in self.xml_multivalued_columns[list_index]:
+        
+            self.bdata = self.remove_multivalued_col_tags(self.bdata,i)
+            
+        return 1
+    def extract_tables_xml(self,table_name):
+            s_inde=self.temp_bdata.index(b'<'+table_name.encode()+b'>')
+            en_inde=self.temp_bdata.index(b'</'+table_name.encode()+b'>')+len(table_name)+3
+            return self.temp_bdata[s_inde:en_inde]
     
     def xml_check_b(self,bdata,list_index=0):
         self.check_multivalued_cols(bdata,list_index)
@@ -265,10 +270,7 @@ class verify:
                             
         return 0
     
-    def extract_tables_xml(self,table_name):
-            s_inde=self.temp_bdata.index(b'<'+table_name.encode()+b'>')
-            en_inde=self.temp_bdata.index(b'</'+table_name.encode()+b'>')+len(table_name)+3
-            return self.temp_bdata[s_inde:en_inde]
+    
         
     def xml_check(self):
         if self.xml_multivalued_columns and len(self.xml_tables) in [0,1]:
