@@ -272,7 +272,7 @@ class verify:
         
     def xml_check(self):
         if self.xml_multivalued_columns and len(self.xml_tables) in [0,1]:
-            self.bdata=self.check_multivalued_cols(self.bdata)
+            self.check_multivalued_cols(self.bdata)
             return self.xml_check_b(self.bdata)
         else:
             self.temp_bdata=self.bdata
