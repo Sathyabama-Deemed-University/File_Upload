@@ -4,3 +4,4 @@ get_config partially completed source code is yet to be updated
 get_logs is completed
 Note:
 Api return base64 encoded bytes data for excel files
+get_config end point is implemented for csv,excel and xml files without multiple tables and multivalued columns
