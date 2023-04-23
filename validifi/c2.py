@@ -3,11 +3,12 @@ import polars as pl
 import io
 from . import config
 from . import errors
-# added two functions for xml
+import base64
+
 class verify:
     def __init__(self,filename, bdata,unique_columns=config.unique_columns, date_format = config.date_format, date_time_column =config.date_time_column,
                  mandatory_column_dtypes=config.mandatory_column_dtypes ,mandatory_columns=config.mandatory_columns, file_size_limit=config.file_size_max_mb,
-                 column_length=20,xml_multivalued_columns=config.xml_muti_valued_columns,xml_tables=config.xml_tables ):
+                 column_length=config.column_lenght,xml_multivalued_columns=config.xml_muti_valued_columns,xml_tables=config.xml_tables ):
         self.bdata = bdata
         self.filename = filename
         self.file_size_limit = file_size_limit * 1000000
@@ -114,38 +115,45 @@ class verify:
         
         for i in self.date_time_column[list_index]:
             try:
+                print(1)
                 self.df = self.df.with_columns(pl.col(i).str.strptime(pl.Date, self.date_format))
                 
             except:
                 try:
-                    self.df.with_columns(pl.col(i).str.strptime(pl.Date, self.decide(self.df[i])))
-             
-                    self.temp_df = self.temp_df.with_columns(pl.Series(name=i, values=self.map_for(self.df[i],self.decide(self.df[i]),self.date_format)))
+                    date_values = self.map_for(self.df[i],self.decide(self.df[i]),self.date_format)
+                    self.df = self.df.with_columns(pl.col(i).str.strptime(pl.Date, self.decide(self.df[i])))
+                    self.temp_df = self.temp_df.with_columns(pl.Series(name=i, values=date_values))
                                
-                except :
-                
+                except Exception as e:
+                    
                     self.error = errors.date_format_e.format(i,self.date_format)
                     return 0
         return 1
     
     def remove_multivalued_col_tags(self,bdata,col_name):
-        string_data = bdata.decode()
-        string_data = string_data.replace(f'<?/{col_name}>')
-        return string_data.encode()
         
-    def check_multivalued_cols(self,list_index=0):
-        for i in self.xml_multivalued_columns[list_index]:
-            self.bdata = self.remove_multivalued_col_tags(self.bdata,i)
+        string_data = bdata.replace(f'<{col_name}>'.encode(),b"")
+        string_data = string_data.replace(f'</{col_name}>'.encode(),b"")
+       
+        return string_data
+    def get_multivalued_cols(self,list_index):
         self.multivalued_cols = []
         for i in self.df.columns:
             if self.df[i].unique()[0] == None and len(self.df[i].unique()) <= 1:
                 self.multivalued_cols.append(i)
-        self.multivalued_cols = list(set(self.multivalued_cols)-set(self.xmlxml_multivalued_columns[list_index]))
+        self.multivalued_cols = list(set(self.multivalued_cols)-set(self.xml_multivalued_columns[list_index]))
         for i in self.multivalued_cols:
             self.bdata = self.remove_multivalued_col_tags(self.bdata,i)
         return 1
-    def _column_length(self):
-        if len(self.df.columns) <= self.column_length:
+    def check_multivalued_cols(self,bdata,list_index=0):
+        self.bdata=bdata
+        for i in self.xml_multivalued_columns[list_index]:
+        
+            self.bdata = self.remove_multivalued_col_tags(self.bdata,i)
+            
+        return 1
+    def _column_length(self,listindex=0):
+        if len(self.df.columns) <= self.column_length[listindex]:
             return 1
         self.error= errors.column_length_e
         return 0
@@ -162,7 +170,10 @@ class verify:
             
     def csv_check(self):
         try:
-            self.df = pl.read_csv(io.BytesIO(self.bdata)).unique()
+            self.df = pl.read_csv(io.BytesIO(self.bdata))
+            if len(self.df) != len(self.df.unique()):
+                self.is_unique=False
+            self.df = self.df.unique()
             self.temp_df=self.df
         except pl.exceptions.NoDataError :
                 self.error = errors.empty_e
@@ -185,7 +196,9 @@ class verify:
     
     def xlsx_xlsm_check(self):
         try:
-            self.df = pl.read_excel(io.BytesIO(self.bdata)).unique()
+            self.df = pl.read_excel(io.BytesIO(self.bdata))
+            
+            self.df = self.df.unique()
             self.temp_df=self.df
         except pl.exceptions.NoDataError :
                 self.error = errors.empty_e
@@ -211,53 +224,73 @@ class verify:
         return 0
     
     def xml_check_b(self,bdata,list_index=0):
+        self.check_multivalued_cols(bdata,list_index)
+       
         try:
-            self.df = pd.read_xml(io.BytesIO(bdata))
+            self.df = pd.read_xml(io.BytesIO(self.bdata))
             if self.df.isnull().sum().values.sum() == sum(self.df.shape):
                 self.error = errors.xml_mutiple_tables_e
                 return 0
-            self.df = pl.from_pandas(self.df).unique()
+            self.df = pl.from_pandas(self.df)
+            
+            self.df = self.df.unique()
             self.temp_df=self.df
             
         except pl.exceptions.NoDataError :
                 self.error = errors.empty_e
                 return 0
-        except :
+        except Exception as e :
            
             
             self.error = errors.corrupted_file_e
             return 0
+        self.get_multivalued_cols(list_index)
+        if self.multivalued_cols:
+            for i in self.multivalued_cols:
+                self.remove_multivalued_col_tags(self.bdata,i)
+            self.df = pd.read_xml(io.BytesIO(self.bdata))
+            self.df = pl.from_pandas(self.df).unique()
+            self.temp_df=self.df
         
         
-        for i in self.df.columns:
-            if self.df[i].unique()[0] == None and len(self.df[i].unique()) <= 1:
-                self.error = errors.xml_multivalued_column_e
-                return 0
         if self._column_length(list_index):
             if self.check_mandatory_columns(list_index):
                 if self.check_date_format(list_index):
                         if self.unique_col(list_index):
                             if self.check_column_type(list_index):
-                                if list_index == 0:
-                                    self.bdata = self.temp_df.to_pandas().to_xml(index=False).encode()
+                                self.bdata = self.temp_df.to_pandas().to_xml(index=False).encode()
+                                
+                                    
                                 return 1
+                            
         return 0
     
     def extract_tables_xml(self,table_name):
-            s_inde=self.bdata.index(b'<'+table_name.encode()+b'>')
-            en_inde=self.bdata.index(b'</'+table_name.encode()+b'>')+len(table_name)+3
-            return pd.read_xml(self.bdata[s_inde:en_inde])
+            s_inde=self.temp_bdata.index(b'<'+table_name.encode()+b'>')
+            en_inde=self.temp_bdata.index(b'</'+table_name.encode()+b'>')+len(table_name)+3
+            return self.temp_bdata[s_inde:en_inde]
         
     def xml_check(self):
         if self.xml_multivalued_columns and len(self.xml_tables) in [0,1]:
-            self.bdata=self.check_multivalued_cols()
+            self.bdata=self.check_multivalued_cols(self.bdata)
             return self.xml_check_b(self.bdata)
         else:
+            self.temp_bdata=self.bdata
+            temp_bdata=bytes()
             for index,value in enumerate(self.xml_tables):
-                if self.xml_check_b(value,index):
-                    pass
+                
+                table=self.extract_tables_xml(value)
+                
+                if self.xml_check_b(table,index):
+                    
+                    self.bdata = self.bdata.replace(b"<?xml version='1.0' encoding='utf-8'?>",b"")
+                    self.bdata = self.bdata.replace(b'<data>',f'<{value}>'.encode())
+                    self.bdata = self.bdata.replace(b'</data>',f'</{value}>'.encode())
+                    temp_bdata += self.bdata
                 else:return 0
-           
+            
+            self.bdata = b"<?xml version='1.0' encoding='utf-8'?>\n<root>"+temp_bdata+b"\n</root>"
+            self.bdata = self.bdata.replace(b"\n<b'",b"\n")
             return 1
                 
                 
