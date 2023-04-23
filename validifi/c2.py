@@ -233,11 +233,7 @@ class verify:
        
         try:
             self.df = pd.read_xml(io.BytesIO(self.bdata))
-            if self.df.isnull().sum().values.sum() == sum(self.df.shape):
-                self.error = errors.xml_mutiple_tables_e
-                return 0
             self.df = pl.from_pandas(self.df)
-            
             self.df = self.df.unique()
             self.temp_df=self.df
             
