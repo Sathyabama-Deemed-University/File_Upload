@@ -41,11 +41,12 @@ class verify:
        
        
     def check_file_type(self):
-         try:
+        
+        try:
             self.file_type = self.filename.split('.')[-1].upper()
             self.func_call[self.file_type]
             return self.file_type
-         except:
+        except Exception as e:
             self.error = errors.file_type_e.format(self.file_type)
             return 0
         
@@ -53,28 +54,28 @@ class verify:
         self.err_cols=[]
         column_dtypes=[self.dict_dtypes[i] for i in self.mandatory_column_dtypes[list_index]]
         for i,j in zip(column_dtypes,self.mandatory_columns[list_index]):
-            if self.df[j].dtype == i:
-                pass
-            else:
+            if self.df[j].dtype != i:
                 self.err_cols.append([i,j])
+           
+                
         if not self.err_cols:
             return 1
         for i in self.err_cols:
             try:
                 self.df = self.df.with_columns(pl.col(i[-1]).cast(i[0]))
             
-            except :
+            except Exception as e:
                 self.error = errors.column_type_e
                 return 0
         return 1
         
     def check_mandatory_columns(self,list_index=0):
         for i in self.mandatory_columns[list_index]:
-            if i in self.df.columns:
-                pass
-            else:
+            if i not in self.df.columns:
                 self.error = errors.mandatory_col_e
                 return 0
+            
+               
         return 1
     
     def decide(self,date):
@@ -100,7 +101,7 @@ class verify:
             return seperator.join(date_format_list)
         return date_format[:-1]
     
-    def map_for(q,data,from_,to):
+    def map_for(self,data,from_,to):
         if '-' in data[0]:
             seperator = '-'
         else:seperator = '/'
@@ -118,7 +119,7 @@ class verify:
                 print(1)
                 self.df = self.df.with_columns(pl.col(i).str.strptime(pl.Date, self.date_format))
                 
-            except:
+            except Exception as e:
                 try:
                     date_values = self.map_for(self.df[i],self.decide(self.df[i]),self.date_format)
                     self.df = self.df.with_columns(pl.col(i).str.strptime(pl.Date, self.decide(self.df[i])))
@@ -157,21 +158,21 @@ class verify:
         except pl.exceptions.NoDataError :
                 self.error = errors.empty_e
                 return 0
-        except :   
+        except Exception as e :   
             
             self.error = errors.corrupted_file_e
             return 0
         if self.df.shape[0] == 0:
             self.error = errors.empty_e
             return 0
-        if self._column_length():
-            if self.check_mandatory_columns():
-                if self.check_date_format():
-                    if self.unique_col():
-                        if self.check_column_type():
-                            self.bdata = self.temp_df.to_pandas().to_csv(index=False).encode()
-                            return 1
-        return 0
+        if not self._column_length(): return 0
+        if not self.check_mandatory_columns(): return 0
+        if not self.check_date_format(): return 0
+        if not self.unique_col(): return 0
+        if not self.check_column_type(): return 0
+                           
+        self.bdata = self.temp_df.to_pandas().to_csv(index=False).encode()
+        return 1
     
     def xlsx_xlsm_check(self):
         try:
@@ -182,26 +183,26 @@ class verify:
         except pl.exceptions.NoDataError :
                 self.error = errors.empty_e
                 return 0
-        except :
+        except Exception as e :
            
             self.error = errors.corrupted_file_e
             return 0
         if self.df.shape[0] == 0:
             self.error = errors.empty_e
         
-            
-        if self._column_length():
-            if self.check_mandatory_columns():
-                if self.check_date_format():
-                    if self.unique_col():
-                        if self.check_column_type():
-                           temp_pointer=io.BytesIO()
-                           self.bdata = self.df.to_pandas().to_excel(temp_pointer,index=False)
-                           temp_pointer.seek(0)
-                           self.bdata=base64.encodebytes(temp_pointer.read())
-                           return 1
-        return 0
+        if not self._column_length(): return 0
+        if not self.check_mandatory_columns(): return 0
+        if not self.check_date_format(): return 0
+        if not self.unique_col(): return 0
+        if not self.check_column_type(): return 0    
+        temp_pointer=io.BytesIO()
+        self.bdata = self.df.to_pandas().to_excel(temp_pointer,index=False)
+        temp_pointer.seek(0)
+        self.bdata=base64.encodebytes(temp_pointer.read())
+        return 1
+        
     def remove_multivalued_col_tags(self,bdata,col_name):
+        
         
         string_data = bdata.replace(f'<{col_name}>'.encode(),b"")
         string_data = string_data.replace(f'</{col_name}>'.encode(),b"")
@@ -224,10 +225,11 @@ class verify:
             
         return 1
     def extract_tables_xml(self,table_name):
-            s_inde=self.temp_bdata.index(b'<'+table_name.encode()+b'>')
-            en_inde=self.temp_bdata.index(b'</'+table_name.encode()+b'>')+len(table_name)+3
-            return self.temp_bdata[s_inde:en_inde]
-    
+        
+        s_inde=self.temp_bdata.index(b'<'+table_name.encode()+b'>')
+        en_inde=self.temp_bdata.index(b'</'+table_name.encode()+b'>')+len(table_name)+3
+        return self.temp_bdata[s_inde:en_inde]
+
     def xml_check_b(self,bdata,list_index=0):
         self.check_multivalued_cols(bdata,list_index)
        
@@ -240,7 +242,7 @@ class verify:
         except pl.exceptions.NoDataError :
             self.error = errors.empty_e
             return 0
-        except :
+        except Exception as e :
             self.error = errors.corrupted_file_e
             return 0
         self.get_multivalued_cols(list_index)
