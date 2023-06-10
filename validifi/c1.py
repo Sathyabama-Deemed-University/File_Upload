@@ -38,7 +38,7 @@ class verify:
         self.date_format = date_format
         self.func_call = {'XLSX': self.xlsx_xlsm_check, 'XLSM': self.xlsx_xlsm_check, 'CSV': self.csv_check, 'XML': self.xml_check}
        
-    def check_file_type(self):
+    def check_file_type(self):   #VALIDATING FILE TYPE
          try:
             self.file_type = self.filename.split('.')[-1].upper()
             self.func_call[self.file_type]
@@ -46,13 +46,13 @@ class verify:
          except Exception:
             self.error = errors.file_type_e.format(self.file_type)
             return 0
-    def check_mandatory_columns(self):
+    def check_mandatory_columns(self): # CHECKS FOR MANDATORY COLUMN
         for i in self.mandatory_columns:
             if i not in self.df.columns:
                 self.error = errors.mandatory_col_e
                 return 0
         return 1
-    def check_column_type(self):
+    def check_column_type(self):   #VALIDATING COLUMN-DATA-TYPE
         
         for i,j in zip(self.mandatory_column_dtypes,self.mandatory_columns):
             if self.df[j].dtype != i:
@@ -61,7 +61,7 @@ class verify:
         return 1
         
     
-    def check_date_format(self):
+    def check_date_format(self): # VALIDATING DATE-FORMAT W.R.T CONFIG FILE
         if len(self.date_time_column) == 0:
             return 1
         try:
@@ -70,14 +70,14 @@ class verify:
         except Exception:
             self.error = errors.date_format_e.format(i,self.date_format)
             return 0
-        
         return 1
    
-    def _column_length(self):
+    def _column_length(self):  #VALIDATING COLUMN-LENGTH W.R.T CONFIG FILE
         if len(self.df.columns) <= self.column_length:
             return 1
         self.error= errors.column_length_e
-    def unique_col(self):
+        
+    def unique_col(self):    #CHECKS FOR UNIQUE COLUMNS
         if len(self.unique_columns) == 0:
             return 1
         for i in self.unique_columns:
@@ -85,9 +85,9 @@ class verify:
                 self.error = errors.unique_col_e.format(i)
                 return 0
         return 1
-    def csv_check(self):
+    def csv_check(self): #VALIDATES CSV FILE 
         try:
-            self.df = pl.read_csv(io.BytesIO(self.bdata))
+            self.df = pl.read_csv(io.BytesIO(self.bdata))  #READS CSV FILE
             self.df = self.df.unique()
             self.temp_df=self.df
         except pl.exceptions.NoDataError :
@@ -108,9 +108,9 @@ class verify:
                             
         self.bdata = self.temp_df.to_pandas().to_csv(index=False).encode()
         return 1
-    def xlsx_xlsm_check(self):
+    def xlsx_xlsm_check(self):   #VALIDATES EXCEL FILE
         try:
-            self.df = pl.read_excel(io.BytesIO(self.bdata))
+            self.df = pl.read_excel(io.BytesIO(self.bdata)) # READS EXCEL FILE
             
             self.df = self.df.unique()
             self.temp_df=self.df
@@ -135,10 +135,10 @@ class verify:
         return 1
                             
         
-    def xml_check(self):
+    def xml_check(self):  #VALIDATES XML FILE
         try:
-            self.df = pd.read_xml(io.BytesIO(self.bdata))
-            if self.df.isnull().sum().values.sum() == sum(self.df.shape):
+            self.df = pd.read_xml(io.BytesIO(self.bdata))  #READS XML FILE
+            if self.df.isnull().sum().values.sum() == sum(self.df.shape):# CHECKS FOR MULTIPLE TABLES AND RETURN ERROR
                 self.error = errors.xml_mutiple_tables_e
                 return 0
             self.df = pl.from_pandas(self.df).unique()
@@ -168,14 +168,14 @@ class verify:
         return 1
                             
         
-    def check_size(self):
+    def check_size(self):  #CHECKS FILE SIZE W.R.T CONFIG FILE
         if len(self.bdata) > self.file_size_limit:
              self.file_data = None
              self.error = errors.file_size_e
              return 0    
         return 1
        
-    def func(self):
+    def func(self): # VALIDATES FILE CONFIG AND PINGS APPOPRIATE FUNCTION CALL
         if self.check_size():
             x=self.check_file_type()
             if x and self.func_call[x]():
