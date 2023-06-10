@@ -46,7 +46,7 @@ class verify:
             self.file_type = self.filename.split('.')[-1].upper()
             self.func_call[self.file_type]
             return self.file_type
-        except Exception as e:
+        except Exception:
             self.error = errors.file_type_e.format(self.file_type)
             return 0
         
@@ -64,7 +64,7 @@ class verify:
             try:
                 self.df = self.df.with_columns(pl.col(i[-1]).cast(i[0]))
             
-            except Exception as e:
+            except Exception:
                 self.error = errors.column_type_e
                 return 0
         return 1
@@ -119,13 +119,13 @@ class verify:
                 print(1)
                 self.df = self.df.with_columns(pl.col(i).str.strptime(pl.Date, self.date_format))
                 
-            except Exception as e:
+            except Exception:
                 try:
                     date_values = self.map_for(self.df[i],self.decide(self.df[i]),self.date_format)
                     self.df = self.df.with_columns(pl.col(i).str.strptime(pl.Date, self.decide(self.df[i])))
                     self.temp_df = self.temp_df.with_columns(pl.Series(name=i, values=date_values))
                                
-                except Exception as e:
+                except Exception:
                     
                     self.error = errors.date_format_e.format(i,self.date_format)
                     return 0
@@ -158,7 +158,7 @@ class verify:
         except pl.exceptions.NoDataError :
                 self.error = errors.empty_e
                 return 0
-        except Exception as e :   
+        except Exception:   
             
             self.error = errors.corrupted_file_e
             return 0
@@ -183,7 +183,7 @@ class verify:
         except pl.exceptions.NoDataError :
                 self.error = errors.empty_e
                 return 0
-        except Exception as e :
+        except Exception:
            
             self.error = errors.corrupted_file_e
             return 0
@@ -242,7 +242,7 @@ class verify:
         except pl.exceptions.NoDataError :
             self.error = errors.empty_e
             return 0
-        except Exception as e :
+        except Exception:
             self.error = errors.corrupted_file_e
             return 0
         self.get_multivalued_cols(list_index)
@@ -253,18 +253,15 @@ class verify:
             self.df = pl.from_pandas(self.df).unique()
             self.temp_df=self.df
         
-        
-        if self._column_length(list_index):
-            if self.check_mandatory_columns(list_index):
-                if self.check_date_format(list_index):
-                        if self.unique_col(list_index):
-                            if self.check_column_type(list_index):
-                                self.bdata = self.temp_df.to_pandas().to_xml(index=False).encode()
-                                
-                                    
-                                return 1
+        if not self._column_length(list_index)): return 0
+        if not self.check_mandatory_columns(list_index)): return 0
+        if not self.check_date_format(list_index)): return 0
+        if not self.unique_col(list_index)): return 0
+        if not self.check_column_type(list_index)): return 0 
+        self.bdata = self.temp_df.to_pandas().to_xml(index=False).encode()
+        return 1
                             
-        return 0
+        
     
     
         
