@@ -40,7 +40,7 @@ class verify:
         self.func_call = {'XLSX': self.xlsx_xlsm_check, 'XLSM': self.xlsx_xlsm_check, 'CSV': self.csv_check, 'XML': self.xml_check}
        
        
-    def check_file_type(self):
+    def check_file_type(self):  #VALIDATING FILE TYPE
         
         try:
             self.file_type = self.filename.split('.')[-1].upper()
@@ -50,7 +50,7 @@ class verify:
             self.error = errors.file_type_e.format(self.file_type)
             return 0
         
-    def check_column_type(self,list_index=0):
+    def check_column_type(self,list_index=0):   #VALIDATING COLUMN-DATA-TYPE
         self.err_cols=[]
         column_dtypes=[self.dict_dtypes[i] for i in self.mandatory_column_dtypes[list_index]]
         for i,j in zip(column_dtypes,self.mandatory_columns[list_index]):
@@ -69,7 +69,7 @@ class verify:
                 return 0
         return 1
         
-    def check_mandatory_columns(self,list_index=0):
+    def check_mandatory_columns(self,list_index=0):   # CHECKS FOR MANDATORY COLUMN
         for i in self.mandatory_columns[list_index]:
             if i not in self.df.columns:
                 self.error = errors.mandatory_col_e
@@ -78,7 +78,7 @@ class verify:
                
         return 1
     
-    def decide(self,date):
+    def decide(self,date):   #EXTRACTS FILE DATE FORMAT AND RETURNS IT
         if '-' in date[0]:
             seperator = '-'
         else:seperator = '/'
@@ -101,7 +101,7 @@ class verify:
             return seperator.join(date_format_list)
         return date_format[:-1]
     
-    def map_for(self,data,from_,to):
+    def map_for(self,data,from_,to):  #CHANGES FILE-DATE-FORMAT W.R.T CONFIG FILE
         if '-' in data[0]:
             seperator = '-'
         else:seperator = '/'
@@ -110,7 +110,7 @@ class verify:
         val = [to.index(i) for i in from_]
         d = [seperator.join([i[val[0]],i[val[1]],i[val[2]]])for i in data] 
         return d
-    def check_date_format(self,list_index=0):
+    def check_date_format(self,list_index=0):    # VALIDATING DATE-FORMAT W.R.T CONFIG FILE
         if len(self.date_time_column[list_index]) == 0:
             return 1
         
@@ -120,25 +120,25 @@ class verify:
                 self.df = self.df.with_columns(pl.col(i).str.strptime(pl.Date, self.date_format))
                 
             except Exception:
-                try:
+                try:  #CHANGES COLUMN-DATE-FORMAT W.R.T  CONFIG FILE
                     date_values = self.map_for(self.df[i],self.decide(self.df[i]),self.date_format)
                     self.df = self.df.with_columns(pl.col(i).str.strptime(pl.Date, self.decide(self.df[i])))
                     self.temp_df = self.temp_df.with_columns(pl.Series(name=i, values=date_values))
                                
-                except Exception:
+                except Exception:# ELSE: RETURN ERROR
                     
                     self.error = errors.date_format_e.format(i,self.date_format)
                     return 0
         return 1
     
     
-    def _column_length(self,listindex=0):
+    def _column_length(self,listindex=0):   #VALIDATING COLUMN-LENGTH W.R.T CONFIG FILE
         if len(self.df.columns) <= self.column_length[listindex]:
             return 1
         self.error= errors.column_length_e
         return 0
     
-    def unique_col(self,list_index=0):
+    def unique_col(self,list_index=0):    #CHECKS FOR UNIQUE COLUMNS
         if len(self.unique_columns[list_index]) == 0:
             return 1
         for i in self.unique_columns[list_index]:
@@ -148,9 +148,9 @@ class verify:
                 self.error = errors.unique_col_e.format(i)
                 return 0
             
-    def csv_check(self):
+    def csv_check(self): #VALIDATES CSV FILE
         try:
-            self.df = pl.read_csv(io.BytesIO(self.bdata))
+            self.df = pl.read_csv(io.BytesIO(self.bdata))  #READS CSV FILE
             if len(self.df) != len(self.df.unique()):
                 self.is_unique=False
             self.df = self.df.unique()
@@ -174,9 +174,9 @@ class verify:
         self.bdata = self.temp_df.to_pandas().to_csv(index=False).encode()
         return 1
     
-    def xlsx_xlsm_check(self):
+    def xlsx_xlsm_check(self):   #VALIDATES EXCEL FILE
         try:
-            self.df = pl.read_excel(io.BytesIO(self.bdata))
+            self.df = pl.read_excel(io.BytesIO(self.bdata))# READS EXCEL FILE
             
             self.df = self.df.unique()
             self.temp_df=self.df
@@ -201,14 +201,14 @@ class verify:
         self.bdata=base64.encodebytes(temp_pointer.read())
         return 1
         
-    def remove_multivalued_col_tags(self,bdata,col_name):
+    def remove_multivalued_col_tags(self,bdata,col_name): #SPLITS MULTIVALUED COLUMNS INTO INDIVIDUAL COLUMNS
         
         
         string_data = bdata.replace(f'<{col_name}>'.encode(),b"")
         string_data = string_data.replace(f'</{col_name}>'.encode(),b"")
        
         return string_data
-    def get_multivalued_cols(self,list_index):
+    def get_multivalued_cols(self,list_index): #EXTRACTS EACH MULTIVALUED COLUMN NAME
         self.multivalued_cols = []
         for i in self.df.columns:
             if self.df[i].unique()[0] == None and len(self.df[i].unique()) <= 1:
@@ -217,24 +217,23 @@ class verify:
         for i in self.multivalued_cols:
             self.bdata = self.remove_multivalued_col_tags(self.bdata,i)
         return 1
-    def check_multivalued_cols(self,bdata,list_index=0):
+    
+    def check_multivalued_cols(self,bdata,list_index=0):  # IF MULTIVALUED COLUMN -->PINGS 'remove_multivalued_col_tags'
         self.bdata=bdata
         for i in self.xml_multivalued_columns[list_index]:
-        
             self.bdata = self.remove_multivalued_col_tags(self.bdata,i)
-            
         return 1
-    def extract_tables_xml(self,table_name):
-        
+    
+    def extract_tables_xml(self,table_name):  #EXTRACTS AND RETURNS TABLE CONTENT
         s_inde=self.temp_bdata.index(b'<'+table_name.encode()+b'>')
         en_inde=self.temp_bdata.index(b'</'+table_name.encode()+b'>')+len(table_name)+3
         return self.temp_bdata[s_inde:en_inde]
 
-    def xml_check_b(self,bdata,list_index=0):
+    def xml_check_b(self,bdata,list_index=0):     #VALIDATES XML FILE
         self.check_multivalued_cols(bdata,list_index)
        
         try:
-            self.df = pd.read_xml(io.BytesIO(self.bdata))
+            self.df = pd.read_xml(io.BytesIO(self.bdata)) #READS XML FILE
             self.df = pl.from_pandas(self.df)
             self.df = self.df.unique()
             self.temp_df=self.df
@@ -260,12 +259,8 @@ class verify:
         if not self.check_column_type(list_index): return 0 
         self.bdata = self.temp_df.to_pandas().to_xml(index=False).encode()
         return 1
-                            
         
-    
-    
-        
-    def xml_check(self):
+    def xml_check(self):     #VALIDATES XML FILE
         if self.xml_multivalued_columns and len(self.xml_tables) in [0,1]:
             self.check_multivalued_cols(self.bdata)
             return self.xml_check_b(self.bdata)
@@ -289,7 +284,7 @@ class verify:
             return 1
                 
                 
-    def check_size(self):
+    def check_size(self):  #CHECKS FILE SIZE W.R.T CONFIG FILE
         if len(self.bdata) > self.file_size_limit:
              self.file_data = None
              self.error = errors.file_size_e
@@ -297,7 +292,7 @@ class verify:
         return 1
        
        
-    def func(self):
+    def func(self): # VALIDATES FILE CONFIG AND PINGS APPOPRIATE FUNCTION CALL
         if self.check_size():
             x=self.check_file_type()
             if x and self.func_call[x]():
