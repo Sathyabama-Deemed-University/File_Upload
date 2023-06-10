@@ -43,23 +43,19 @@ class verify:
             self.file_type = self.filename.split('.')[-1].upper()
             self.func_call[self.file_type]
             return self.file_type
-         except:
+         except Exception:
             self.error = errors.file_type_e.format(self.file_type)
             return 0
     def check_mandatory_columns(self):
         for i in self.mandatory_columns:
-            if i in self.df.columns:
-                pass
-            else:
+            if i not in self.df.columns:
                 self.error = errors.mandatory_col_e
                 return 0
         return 1
     def check_column_type(self):
         
         for i,j in zip(self.mandatory_column_dtypes,self.mandatory_columns):
-            if self.df[j].dtype == i:
-              pass
-            else:
+            if self.df[j].dtype != i:
                 self.error = errors.column_type_e
                 return 0
         return 1
@@ -71,7 +67,7 @@ class verify:
         try:
             for i in self.date_time_column:
                 self.df = self.df.with_columns(pl.col(i).str.strptime(pl.Date, self.date_format))
-        except:
+        except Exception:
             self.error = errors.date_format_e.format(i,self.date_format)
             return 0
         
@@ -85,37 +81,33 @@ class verify:
         if len(self.unique_columns) == 0:
             return 1
         for i in self.unique_columns:
-            if len(self.df[i]) == len(self.df[i].unique()):
-                pass
-            else:
+            if len(self.df[i]) != len(self.df[i].unique()):
                 self.error = errors.unique_col_e.format(i)
                 return 0
         return 1
     def csv_check(self):
         try:
             self.df = pl.read_csv(io.BytesIO(self.bdata))
-            
             self.df = self.df.unique()
             self.temp_df=self.df
         except pl.exceptions.NoDataError :
                 self.error = errors.empty_e
                 return 0
-        except :   
-            
+        except Exception:   
             self.error = errors.corrupted_file_e
             return 0
         if self.df.shape[0] == 0:
             self.error = errors.empty_e
             return 0
         
-        if self._column_length():
-            if self.check_mandatory_columns():
-                if self.check_date_format():
-                    if self.unique_col():
-                        if self.check_column_type():
-                            self.bdata = self.temp_df.to_pandas().to_csv(index=False).encode()
-                            return 1
-        return 0
+        if self._column_length(): return 0
+        if self.check_mandatory_columns(): return 0
+        if self.check_date_format(): return 0
+        if self.unique_col(): return 0
+        if self.check_column_type(): return 0
+                            
+        self.bdata = self.temp_df.to_pandas().to_csv(index=False).encode()
+        return 1
     def xlsx_xlsm_check(self):
         try:
             self.df = pl.read_excel(io.BytesIO(self.bdata))
@@ -125,24 +117,24 @@ class verify:
         except pl.exceptions.NoDataError :
                 self.error = errors.empty_e
                 return 0
-        except :   
+        except Exception :   
             self.error = errors.corrupted_file_e
             return 0
         if self.df.shape[0] == 0:
             self.error = errors.empty_e
         
-        if self._column_length():
-            if self.check_mandatory_columns():
-                if self.check_date_format():
-                    if self.unique_col():
-                        if self.check_column_type():
-                           temp_pointer=io.BytesIO()
-                           self.bdata = self.df.to_pandas().to_excel(temp_pointer,index=False)
-                           temp_pointer.seek(0)
-                           self.bdata=base64.encodebytes(temp_pointer.read())
-                           return 1
+        if self._column_length(): return 0
+        if self.check_mandatory_columns(): return 0
+        if self.check_date_format(): return 0
+        if self.unique_col(): return 0
+        if self.check_column_type(): return 0
+        temp_pointer=io.BytesIO()
+        self.bdata = self.df.to_pandas().to_excel(temp_pointer,index=False)
+        temp_pointer.seek(0)
+        self.bdata=base64.encodebytes(temp_pointer.read())
+        return 1
                             
-        return 0
+        
     def xml_check(self):
         try:
             self.df = pd.read_xml(io.BytesIO(self.bdata))
@@ -155,7 +147,7 @@ class verify:
         except pl.exceptions.NoDataError :
                 self.error = errors.empty_e
                 return 0
-        except :
+        except Exception:
             self.error = errors.corrupted_file_e
             return 0
         
@@ -167,15 +159,15 @@ class verify:
                 return 0
         
        
-        if self._column_length():
-            if self.check_mandatory_columns():
-                if self.check_date_format():
-                    if self.unique_col():
-                        if self.check_column_type():
-                            self.bdata = self.temp_df.to_pandas().to_xml(index=False).encode()
-                            return 1
+        if self._column_length(): return 0
+        if self.check_mandatory_columns(): return 0
+        if self.check_date_format(): return 0
+        if self.unique_col(): return 0
+        if self.check_column_type(): return 0
+        self.bdata = self.temp_df.to_pandas().to_xml(index=False).encode()
+        return 1
                             
-        return 0
+        
     def check_size(self):
         if len(self.bdata) > self.file_size_limit:
              self.file_data = None
