@@ -26,7 +26,7 @@ async def validate_configuration_2(file : UploadFile=File(...)):
     b_file= await file.read()
     
     validation=validifi.c2.verify(file.filename,b_file).func()
-    db=duckdb.connect(db_file_name')
+    db=duckdb.connect(db_file_name)
     cursor=db.cursor()
     if type(validation) == bytes:
         cursor.execute(db_query,(file.filename,1))
