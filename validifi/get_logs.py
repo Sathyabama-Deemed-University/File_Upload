@@ -1,5 +1,6 @@
 import pandas as pd
 class get_logs:
+    # no variables are bound to get_logs
     def __init__(self):
         pass
        
@@ -14,5 +15,5 @@ class get_logs:
     def func(self,cursor):
         log_data = cursor.execute('select * from logs')
         log_data = log_data.fetchall()
-        file = self.convert_logs(log_data)
-        return file
+        files = self.convert_logs(log_data)
+        return files
