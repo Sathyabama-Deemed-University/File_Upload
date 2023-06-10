@@ -300,7 +300,6 @@ class verify:
     def func(self):
         if self.check_size():
             x=self.check_file_type()
-            if x:
-                if self.func_call[x]():
-                    return self.bdata
+            if x and self.func_call[x]():
+                return self.bdata
         return self.error
