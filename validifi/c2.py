@@ -253,11 +253,11 @@ class verify:
             self.df = pl.from_pandas(self.df).unique()
             self.temp_df=self.df
         
-        if not self._column_length(list_index)): return 0
-        if not self.check_mandatory_columns(list_index)): return 0
-        if not self.check_date_format(list_index)): return 0
-        if not self.unique_col(list_index)): return 0
-        if not self.check_column_type(list_index)): return 0 
+        if not self._column_length(list_index): return 0
+        if not self.check_mandatory_columns(list_index): return 0
+        if not self.check_date_format(list_index): return 0
+        if not self.unique_col(list_index): return 0
+        if not self.check_column_type(list_index): return 0 
         self.bdata = self.temp_df.to_pandas().to_xml(index=False).encode()
         return 1
                             
