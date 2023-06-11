@@ -5,7 +5,7 @@ config:
   mandatory_columns: [[]] #add multivalued columns subcolumns names here nested list
   mandatory_column_dtypes: [[]] #add multivalued columns subcolumns datatypes here nested list
   file_size_max_mb: 10
-  column_lenght: [] 
+  column_lenght: [[]] 
   xml_muti_valued_columns: [[]] #nested list
   xml_tables: []
   supported_formats: csv,xlsx,xlsm,xml
