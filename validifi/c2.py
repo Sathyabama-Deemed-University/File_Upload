@@ -147,7 +147,13 @@ class verify:
             else:
                 self.error = errors.unique_col_e.format(i)
                 return 0
-            
+    def check_conditions(self,list_index=0):
+        if not self._column_length(list_index): return 0
+        if not self.check_mandatory_columns(list_index): return 0
+        if not self.check_date_format(list_index): return 0
+        if not self.unique_col(list_index): return 0
+        if not self.check_column_type(list_index): return 0
+        return 1
     def csv_check(self): #VALIDATES CSV FILE
         try:
             self.df = pl.read_csv(io.BytesIO(self.bdata))  #READS CSV FILE
@@ -165,14 +171,11 @@ class verify:
         if self.df.shape[0] == 0:
             self.error = errors.empty_e
             return 0
-        if not self._column_length(): return 0
-        if not self.check_mandatory_columns(): return 0
-        if not self.check_date_format(): return 0
-        if not self.unique_col(): return 0
-        if not self.check_column_type(): return 0
-                           
-        self.bdata = self.temp_df.to_pandas().to_csv(index=False).encode()
-        return 1
+       
+        if check_conditions():                  
+            self.bdata = self.temp_df.to_pandas().to_csv(index=False).encode()
+            return 1
+        return 0
     
     def xlsx_xlsm_check(self):   #VALIDATES EXCEL FILE
         try:
@@ -190,16 +193,13 @@ class verify:
         if self.df.shape[0] == 0:
             self.error = errors.empty_e
         
-        if not self._column_length(): return 0
-        if not self.check_mandatory_columns(): return 0
-        if not self.check_date_format(): return 0
-        if not self.unique_col(): return 0
-        if not self.check_column_type(): return 0    
-        temp_pointer=io.BytesIO()
-        self.bdata = self.df.to_pandas().to_excel(temp_pointer,index=False)
-        temp_pointer.seek(0)
-        self.bdata=base64.encodebytes(temp_pointer.read())
-        return 1
+        if check_conditions(): 
+            temp_pointer=io.BytesIO()
+            self.bdata = self.df.to_pandas().to_excel(temp_pointer,index=False)
+            temp_pointer.seek(0)
+            self.bdata=base64.encodebytes(temp_pointer.read())
+            return 1
+        return 0
         
     def remove_multivalued_col_tags(self,bdata,col_name): #SPLITS MULTIVALUED COLUMNS INTO INDIVIDUAL COLUMNS
         
@@ -252,13 +252,10 @@ class verify:
             self.df = pl.from_pandas(self.df).unique()
             self.temp_df=self.df
         
-        if not self._column_length(list_index): return 0
-        if not self.check_mandatory_columns(list_index): return 0
-        if not self.check_date_format(list_index): return 0
-        if not self.unique_col(list_index): return 0
-        if not self.check_column_type(list_index): return 0 
-        self.bdata = self.temp_df.to_pandas().to_xml(index=False).encode()
-        return 1
+        if check_conditions(list_index):
+            self.bdata = self.temp_df.to_pandas().to_xml(index=False).encode()
+            return 1
+        return 0
         
     def xml_check(self):     #VALIDATES XML FILE
         if self.xml_multivalued_columns and len(self.xml_tables) in [0,1]:
