@@ -86,11 +86,11 @@ class verify:
                 return 0
         return 1
     def check_conditions(self):
-        if self._column_length(): return 0
-        if self.check_mandatory_columns(): return 0
-        if self.check_date_format(): return 0
-        if self.unique_col(): return 0
-        if self.check_column_type(): return 0
+        if not self._column_length(): return 0
+        if not self.check_mandatory_columns(): return 0
+        if not self.check_date_format(): return 0
+        if not self.unique_col(): return 0
+        if not self.check_column_type(): return 0
         return 1
         
         
