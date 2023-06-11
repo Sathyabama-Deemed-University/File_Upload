@@ -108,9 +108,9 @@ class verify:
         if self.df.shape[0] == 0:
             self.error = errors.empty_e
             return 0
-        if self.check_conditions():
-            self.bdata = self.temp_df.to_pandas().to_csv(index=False).encode()
-            return 1
+#         if self.check_conditions():
+#             self.bdata = self.temp_df.to_pandas().to_csv(index=False).encode()
+#             return 1
         return 0
         
                             
@@ -130,12 +130,12 @@ class verify:
         if self.df.shape[0] == 0:
             self.error = errors.empty_e
         
-        if self.check_conditions():
-            temp_pointer=io.BytesIO()
-            self.bdata = self.df.to_pandas().to_excel(temp_pointer,index=False)
-            temp_pointer.seek(0)
-            self.bdata=base64.encodebytes(temp_pointer.read())
-            return 1
+#         if self.check_conditions():
+#             temp_pointer=io.BytesIO()
+#             self.bdata = self.df.to_pandas().to_excel(temp_pointer,index=False)
+#             temp_pointer.seek(0)
+#             self.bdata=base64.encodebytes(temp_pointer.read())
+#             return 1
         return 0
                             
         
@@ -163,9 +163,9 @@ class verify:
                 return 0
         
        
-        if self.check_conditions():
-            self.bdata = self.temp_df.to_pandas().to_xml(index=False).encode()
-            return 1
+#         if self.check_conditions():
+#             self.bdata = self.temp_df.to_pandas().to_xml(index=False).encode()
+#             return 1
         return 0
                             
         
