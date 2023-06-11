@@ -172,7 +172,7 @@ class verify:
             self.error = errors.empty_e
             return 0
        
-        if check_conditions():                  
+        if self.check_conditions():                  
             self.bdata = self.temp_df.to_pandas().to_csv(index=False).encode()
             return 1
         return 0
@@ -193,7 +193,7 @@ class verify:
         if self.df.shape[0] == 0:
             self.error = errors.empty_e
         
-        if check_conditions(): 
+        if self.check_conditions(): 
             temp_pointer=io.BytesIO()
             self.bdata = self.df.to_pandas().to_excel(temp_pointer,index=False)
             temp_pointer.seek(0)
@@ -252,7 +252,7 @@ class verify:
             self.df = pl.from_pandas(self.df).unique()
             self.temp_df=self.df
         
-        if check_conditions(list_index):
+        if self.check_conditions(list_index):
             self.bdata = self.temp_df.to_pandas().to_xml(index=False).encode()
             return 1
         return 0
