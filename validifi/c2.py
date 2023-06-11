@@ -40,7 +40,7 @@ class verify:
         self.func_call = {'XLSX': self.xlsx_xlsm_check, 'XLSM': self.xlsx_xlsm_check, 'CSV': self.csv_check, 'XML': self.xml_check}
        
        
-    def check_file_type(self):  #VALIDATING FILE TYPE
+    def check_file_type(self):   #VALIDATING FILE TYPE
         
         try:
             self.file_type = self.filename.split('.')[-1].upper()
@@ -69,7 +69,7 @@ class verify:
                 return 0
         return 1
         
-    def check_mandatory_columns(self,list_index=0):   # CHECKS FOR MANDATORY COLUMN
+    def check_mandatory_columns(self,list_index=0):    # CHECKS FOR MANDATORY COLUMN
         for i in self.mandatory_columns[list_index]:
             if i not in self.df.columns:
                 self.error = errors.mandatory_col_e
@@ -78,7 +78,7 @@ class verify:
                
         return 1
     
-    def decide(self,date):   #EXTRACTS FILE DATE FORMAT AND RETURNS IT
+    def decide(self,date):    #EXTRACTS FILE DATE FORMAT AND RETURNS IT
         if '-' in date[0]:
             seperator = '-'
         else:seperator = '/'
@@ -110,7 +110,7 @@ class verify:
         val = [to.index(i) for i in from_]
         d = [seperator.join([i[val[0]],i[val[1]],i[val[2]]])for i in data] 
         return d
-    def check_date_format(self,list_index=0):    # VALIDATING DATE-FORMAT W.R.T CONFIG FILE
+    def check_date_format(self,list_index=0):     # VALIDATING DATE-FORMAT W.R.T CONFIG FILE
         if len(self.date_time_column[list_index]) == 0:
             return 1
         
@@ -120,25 +120,25 @@ class verify:
                 self.df = self.df.with_columns(pl.col(i).str.strptime(pl.Date, self.date_format))
                 
             except Exception:
-                try:  #CHANGES COLUMN-DATE-FORMAT W.R.T  CONFIG FILE
+                try:   #CHANGES COLUMN-DATE-FORMAT W.R.T  CONFIG FILE
                     date_values = self.map_for(self.df[i],self.decide(self.df[i]),self.date_format)
                     self.df = self.df.with_columns(pl.col(i).str.strptime(pl.Date, self.decide(self.df[i])))
                     self.temp_df = self.temp_df.with_columns(pl.Series(name=i, values=date_values))
                                
-                except Exception:# ELSE: RETURN ERROR
+                except Exception:   # ELSE: RETURN ERROR
                     
                     self.error = errors.date_format_e.format(i,self.date_format)
                     return 0
         return 1
     
     
-    def _column_length(self,listindex=0):   #VALIDATING COLUMN-LENGTH W.R.T CONFIG FILE
+    def _column_length(self,listindex=0):    #VALIDATING COLUMN-LENGTH W.R.T CONFIG FILE
         if len(self.df.columns) <= self.column_length[listindex]:
             return 1
         self.error= errors.column_length_e
         return 0
     
-    def unique_col(self,list_index=0):    #CHECKS FOR UNIQUE COLUMNS
+    def unique_col(self,list_index=0):   #CHECKS FOR UNIQUE COLUMNS
         if len(self.unique_columns[list_index]) == 0:
             return 1
         for i in self.unique_columns[list_index]:
@@ -154,7 +154,7 @@ class verify:
         if not self.unique_col(list_index): return 0
         if not self.check_column_type(list_index): return 0
         return 1
-    def csv_check(self): #VALIDATES CSV FILE
+    def csv_check(self):  #VALIDATES CSV FILE
         try:
             self.df = pl.read_csv(io.BytesIO(self.bdata))  #READS CSV FILE
             if len(self.df) != len(self.df.unique()):
@@ -179,7 +179,7 @@ class verify:
     
     def xlsx_xlsm_check(self):   #VALIDATES EXCEL FILE
         try:
-            self.df = pl.read_excel(io.BytesIO(self.bdata))# READS EXCEL FILE
+            self.df = pl.read_excel(io.BytesIO(self.bdata))   # READS EXCEL FILE
             
             self.df = self.df.unique()
             self.temp_df=self.df
