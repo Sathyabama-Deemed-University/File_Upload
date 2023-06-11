@@ -85,7 +85,7 @@ class verify:
                 self.error = errors.unique_col_e.format(i)
                 return 0
         return 1
-    def check_conditions(self):
+    def check_conditions(self):     #VALIDATES BASIC CONSTRAINTS
         if not self._column_length(): return 0
         if not self.check_mandatory_columns(): return 0
         if not self.check_date_format(): return 0
