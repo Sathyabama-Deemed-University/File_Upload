@@ -98,6 +98,11 @@ class verify:
             self.bdata = self.temp_df.to_pandas().to_xml(index=False).encode()
             return 1
         else:
+            temp_pointer=io.BytesIO()
+            self.bdata = self.df.to_pandas().to_excel(temp_pointer,index=False)
+            temp_pointer.seek(0)
+            self.bdata=base64.encodebytes(temp_pointer.read())
+            return 1
             
             
         
