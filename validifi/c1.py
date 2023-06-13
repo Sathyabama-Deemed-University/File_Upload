@@ -91,10 +91,10 @@ class verify:
         if not self.check_date_format(): return 0
         if not self.unique_col(): return 0
         if not self.check_column_type(): return 0
-        if self.filename == 'CSV':
+        if self.filetype == 'CSV':
             self.bdata = self.temp_df.to_pandas().to_csv(index=False).encode()
             return 1
-        elif self.filename == 'XML':
+        elif self.filetype == 'XML':
             self.bdata = self.temp_df.to_pandas().to_xml(index=False).encode()
             return 1
         else:
