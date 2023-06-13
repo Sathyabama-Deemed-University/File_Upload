@@ -149,8 +149,8 @@ class verify:
             self.temp_df = self.df
             
         except pl.exceptions.NoDataError :
-                self.error = errors.empty_e
-                return 0
+            self.error = errors.empty_e
+            return 0
         except Exception:
             self.error = errors.corrupted_file_e
             return 0
