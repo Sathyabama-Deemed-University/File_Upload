@@ -40,7 +40,7 @@ class verify:
         self.func_call = {'XLSX': self.xlsx_xlsm_check, 'XLSM': self.xlsx_xlsm_check, 'CSV': self.csv_check, 'XML': self.xml_check}
        
        
-    def check_file_type(self):   #VALIDATING FILE TYPE
+    def check_file_type(self):   #VALIDATING FILE  TYPE
         
         try:
             self.file_type = self.filename.split('.')[-1].upper()
