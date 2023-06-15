@@ -1,5 +1,5 @@
 pandas 
-polars 
+polars==0.17.5
 duckdb 
 fastapi 
 uvicorn 
