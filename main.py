@@ -33,7 +33,7 @@ async def validate_configuration_2(file : UploadFile=File(...)):
 
 @app.get('/get_Logs')
 async def get_logs():
-    db = duckdb.connect(db_file_name)
+    db = duckdb.connect('logs.db')
     cursor = db.cursor()
     files = validifi.get_logs.get_logs().func(cursor)
     return {'file':files}
