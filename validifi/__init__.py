@@ -1,4 +1,3 @@
-from . import c1
-from . import c2
-from . import get_config
+from . import configuration1
+from . import configuration2
 from . import get_logs
