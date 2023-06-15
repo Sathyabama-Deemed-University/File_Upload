@@ -7,12 +7,12 @@ app=FastAPI()
 def update(file_name,validation):
     db=duckdb.connect('logs.db')
     cursor=db.cursor()
-    ret_val={'status':0,'file':validation}
+    ret_val={'status':1,'file':validation}
     if type(validation)==bytes:
         cursor.execute("insert into logs values(?,?)",(file_name,1))
-        ret_val['status']=1
     else :
         cursor.execute("insert into logs values(?,?)",(file_name,validation))
+        ret_val={'status':0,'error':validation}
     cursor.commit()
     cursor.close()
     return ret_val
