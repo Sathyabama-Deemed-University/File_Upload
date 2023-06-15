@@ -122,13 +122,7 @@ class verify:
             self.error = errors.empty_e
             return 0
         return self.check_conditions()
-#         if self.check_conditions():
-#             temp_pointer=io.BytesIO()
-#             self.bdata = self.df.to_pandas().to_excel(temp_pointer,index=False)
-#             temp_pointer.seek(0)
-#             self.bdata=base64.encodebytes(temp_pointer.read())
-#             return 1
-#         return 0
+
 
         
                             
@@ -148,10 +142,7 @@ class verify:
         if self.df.shape[0] == 0:
             self.error = errors.empty_e
         return self.check_conditions()
-#         if self.check_conditions():
-           
-#         return 0
-                            
+
         
     def xml_check(self):  #VALIDATES XML FILE
         try:
@@ -176,10 +167,7 @@ class verify:
             
                 return 0
         return self.check_conditions()
-       
-#         if self.check_conditions():
-           
-#         return 0
+
                             
         
     def check_size(self):  #CHECKS FILE SIZE W.R.T CONFIG FILE
