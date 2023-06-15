@@ -30,10 +30,7 @@ async def validate_configuration_2(file : UploadFile=File(...)):
     validation=validifi.configuration2.verify(file.filename,b_file).func()
     return update(file.filename,validation)
  
-@app.post('/get_Configuration')
-# code yet to update
-async def get_configuration(file : UploadFile=File(...)):
-    pass
+
 @app.get('/get_Logs')
 async def get_logs():
     db = duckdb.connect(db_file_name)
