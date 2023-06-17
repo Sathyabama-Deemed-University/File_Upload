@@ -1,7 +1,7 @@
 import yaml
 
 
-
+#READING CONFIG FILE
 with open('config.yml','rb') as file:
     config=yaml.safe_load(file.read())
 
