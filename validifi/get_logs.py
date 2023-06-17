@@ -4,7 +4,7 @@ class get_logs:
     def __init__(self):
         pass
        
-    def convert_logs(self,data):
+    def convert_logs(self,data): #CONVERT ALL ENTRIES TO A CSV FILE
         data = list(zip(*[list(i) for i in data]))
         logs = pd.DataFrame({
         'Filename':data[0],
@@ -12,7 +12,7 @@ class get_logs:
         }).to_csv(index=False)
         
         return logs.encode()
-    def func(self,cursor):
+    def func(self,cursor): #RETURNS THE LOGS AS CSV FILE
         log_data = cursor.execute('select * from logs')
         log_data = log_data.fetchall()
         files = self.convert_logs(log_data)
