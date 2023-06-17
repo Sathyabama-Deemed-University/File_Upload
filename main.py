@@ -4,7 +4,7 @@ import duckdb
  
 app=FastAPI()
 
-def update(file_name,validation):
+def update(file_name,validation): #UPDATES THE LOGS TO THE DATABASE
     db=duckdb.connect('logs.db')
     cursor=db.cursor()
     ret_val={'status':1,'file':validation}
