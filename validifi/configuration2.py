@@ -79,7 +79,7 @@ class verify:
                
         return 1
     
-    def date_formate(self,cols):
+    def date_formate(self,cols):        #EXTRACTS DATE FROM THE FILE
         d_f=list(zip(*[list(map(int,re.findall(r'[0-9]{1,4}',i)))for i in cols]))
         print(d_f)
         formate=[]
@@ -99,7 +99,7 @@ class verify:
         elif '.' in date[0]:return '.'
         return '-'
 
-    def map_for2(self,date:list,to):
+    def map_for2(self,date:list,to): #CHANGE THE DATE FORMAT ACCORDING TO CONFIGFILE
         from_,sep,da=self.date_formate(date)
         d_f=[0]*3
         sp=lambda x:sep.join(map(str,x))
