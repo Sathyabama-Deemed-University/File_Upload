@@ -4,6 +4,7 @@ import io
 from . import config
 from . import errors
 import base64
+import re
 
 class verify:
     def __init__(self,filename, bdata,unique_columns=config.unique_columns, date_format = config.date_format, date_time_column =config.date_time_column,
@@ -78,38 +79,37 @@ class verify:
                
         return 1
     
-    def decide(self,date):    #EXTRACTS FILE DATE FORMAT AND RETURNS IT
-        if '-' in date[0]:
-            seperator = '-'
-        else:seperator = '/'
-        p=[tuple(map(int,i.split(seperator))) for i in date]
-        self.date_max = [max(list(zip(*p))[0]),max(list(zip(*p))[1]),max(list(zip(*p))[2])]
-        date_format = ''
-        for i in self.date_max:
-            if i>100:
-                date_format = date_format+f'%Y{seperator}'
-            elif i>12:
-                date_format = date_format+f'%d{seperator}'
-            else:date_format = date_format+f'%m{seperator}'
-    
-        if len(set(date_format[:-1].split(seperator))) < 3:
-            date_format_list = date_format.split(seperator)
-            if date_format_list.count('%d') == 2:
-                date_format_list[date_format_list.index('%d')] = '%m'
-            if date_format_list.count('%m') == 2:
-                date_format_list[date_format_list.index('%m')] = '%d'
-            return seperator.join(date_format_list)
-        return date_format[:-1]
-    
-    def map_for(self,data,from_,to):  #CHANGES FILE-DATE-FORMAT W.R.T CONFIG FILE
-        if '-' in data[0]:
-            seperator = '-'
-        else:seperator = '/'
-        from_,to = from_.split(seperator),to.split(seperator)
-        data = list(map(lambda x:x.split(seperator),data))
-        val = [to.index(i) for i in from_]
-        d = [seperator.join([i[val[0]],i[val[1]],i[val[2]]])for i in data] 
-        return d
+    def date_formate(self,cols):
+        d_f=list(zip(*[list(map(int,re.findall(r'[0-9]{1,4}',i)))for i in cols]))
+        print(d_f)
+        formate=[]
+        sep='-'
+        if '/' in cols[0]:sep='/'
+        elif '.' in cols[0]:sep='.'
+
+        for i in d_f:
+            if max(i)<=12:formate.append("%m")
+            elif max(i)>31:formate.append("%Y")
+            elif max(i)<=31 and max(d_f[2])>12:formate.append('%d')
+        if formate.count('%m')>1:formate[formate.index('%m')]='%d'
+        return sep.join(formate),sep,d_f
+
+    def find_sep(date:list):
+        if '/' in date[0]:return '/'
+        elif '.' in date[0]:return '.'
+        return '-'
+
+    def map_for2(self,date:list,to):
+        from_,sep,da=self.date_formate(date)
+        d_f=[0]*3
+        sp=lambda x:sep.join(map(str,x))
+        f_l,t_l=from_.split(sep),to.split(sep)
+        if len(f_l)!=3 or len(t_l)!=3:
+            raise ValueError(f"WARNING:PROVIDED DATE FORMATE '{to}' IS INVALID! TRY USING SEPRATOR WHICH MATCHS '{from_}'")
+        for i,j in enumerate(f_l):
+            d_f[t_l.index(j)]=da[i]
+        date_real=list(zip(*d_f))
+        return from_,list(map(sp,date_real))
     def check_date_format(self,list_index=0):     # VALIDATING DATE-FORMAT W.R.T CONFIG FILE
         if len(self.date_time_column[list_index]) == 0:
             return 1
@@ -121,8 +121,8 @@ class verify:
                 
             except Exception:
                 try:   #CHANGES COLUMN-DATE-FORMAT W.R.T  CONFIG FILE
-                    date_values = self.map_for(self.df[i],self.decide(self.df[i]),self.date_format)
-                    self.df = self.df.with_columns(pl.col(i).str.strptime(pl.Date, self.decide(self.df[i])))
+                    from_,date_values = self.map_for2(self.df[i],self.date_format)
+                    self.df = self.df.with_columns(pl.col(i).str.strptime(pl.Date, from_))
                     self.temp_df = self.temp_df.with_columns(pl.Series(name=i, values=date_values))
                                
                 except Exception:   # ELSE: RETURN ERROR
@@ -180,7 +180,6 @@ class verify:
     def xlsx_xlsm_check(self):   #VALIDATES EXCEL FILE
         try:
             self.df = pl.read_excel(io.BytesIO(self.bdata))   # READS EXCEL FILE
-            
             self.df = self.df.unique()
             self.temp_df=self.df
         except pl.exceptions.NoDataError :
