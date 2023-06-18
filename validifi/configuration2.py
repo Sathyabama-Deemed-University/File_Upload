@@ -119,7 +119,7 @@ class verify:
                 
             except Exception:
                 try:   #CHANGES COLUMN-DATE-FORMAT W.R.T  CONFIG FILE
-                    from_,date_values = self.map_for2(self.df[i],self.date_format)
+                    from_,date_values = self.map_for(self.df[i],self.date_format)
                     self.df = self.df.with_columns(pl.col(i).str.strptime(pl.Date, from_))
                     self.temp_df = self.temp_df.with_columns(pl.Series(name=i, values=date_values))
                                
