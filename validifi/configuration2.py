@@ -12,7 +12,7 @@ class verify:
                  column_length=config.column_lenght,xml_multivalued_columns=config.xml_muti_valued_columns,xml_tables=config.xml_tables ):
         self.bdata = bdata
         self.filename = filename
-        self.file_size_limit = file_size_limit * 1000000
+        self.file_size_limit = file_size_limit * 1024*1024
         self.column_length = column_length
         self.unique_columns = unique_columns
         self.dict_dtypes={'Int8': pl.Int8,
