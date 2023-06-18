@@ -81,7 +81,7 @@ class verify:
     
     def date_formate(self,cols):        #EXTRACTS DATE FROM THE FILE
         d_f=list(zip(*[list(map(int,re.findall(r'[0-9]{1,4}',i)))for i in cols]))
-        print(d_f)
+      
         formate=[]
         sep='-'
         if '/' in cols[0]:sep='/'
@@ -94,18 +94,16 @@ class verify:
         if formate.count('%m')>1:formate[formate.index('%m')]='%d'
         return sep.join(formate),sep,d_f
 
-    def find_sep(date:list):
-        if '/' in date[0]:return '/'
-        elif '.' in date[0]:return '.'
-        return '-'
+    
 
-    def map_for2(self,date:list,to): #CHANGE THE DATE FORMAT ACCORDING TO CONFIGFILE
+    def map_for(self,date,to): #CHANGE THE DATE FORMAT ACCORDING TO CONFIGFILE
         from_,sep,da=self.date_formate(date)
         d_f=[0]*3
         sp=lambda x:sep.join(map(str,x))
         f_l,t_l=from_.split(sep),to.split(sep)
         if len(f_l)!=3 or len(t_l)!=3:
-            raise ValueError(f"WARNING:PROVIDED DATE FORMATE '{to}' IS INVALID! TRY USING SEPRATOR WHICH MATCHS '{from_}'")
+            self.error = self.date_format_e
+            return 0
         for i,j in enumerate(f_l):
             d_f[t_l.index(j)]=da[i]
         date_real=list(zip(*d_f))
@@ -116,7 +114,7 @@ class verify:
         
         for i in self.date_time_column[list_index]:
             try:
-                print(1)
+                
                 self.df = self.df.with_columns(pl.col(i).str.strptime(pl.Date, self.date_format))
                 
             except Exception:
