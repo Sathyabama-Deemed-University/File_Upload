@@ -78,7 +78,7 @@ class verify:
                
         return 1
     
-   def date_formate(self,cols):   #EXTRACTS DATE_FORMAT FROM THE FILE
+    def date_formate(self,cols):   #EXTRACTS DATE_FORMAT FROM THE FILE
         d_f=list(zip(*[list(map(int,re.findall(r'[0-9]{1,4}',i)))for i in cols]))
      
         formate=[]
