@@ -23,17 +23,17 @@ def update(file_name,validation,db):#UPDATES THE LOGS TO THE DATABASE
         return {'error':validation}
  
 @app.post('/validate_Configuration_1')
-async def validate_configuration_1(file : UploadFile=File(...)):
+async def validate_configuration_1(file : UploadFile=File(...),db: db.session = Depends(db.db)):
     b_file= await file.read()
     validation=validifi.configuration1.verify(file.filename,b_file).func()
-    return update(file.filename,validation)
+    return update(file.filename,validation,db)
  
 @app.post('/validate_Configuration_2')
-async def validate_configuration_2(file : UploadFile=File(...)):
+async def validate_configuration_2(file : UploadFile=File(...),db: db.session = Depends(db.db)):
     b_file= await file.read()
     
     validation=validifi.configuration2.verify(file.filename,b_file).func()
-    return update(file.filename,validation)
+    return update(file.filename,validation,db)
  
 
 
