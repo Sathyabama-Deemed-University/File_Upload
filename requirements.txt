@@ -9,3 +9,4 @@ pyarrow==11.0.0
 openpyxl==3.0.10
 lxml==4.9.1
 xlsx2csv==0.8.1
+SQLAlchemy==1.4.23
