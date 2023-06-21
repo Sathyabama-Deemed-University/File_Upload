@@ -1,21 +1,26 @@
-from fastapi import FastAPI,UploadFile,File
+from fastapi import FastAPI,UploadFile,File,Depends
 import validifi
-import duckdb
+import database.db as db
+import database.table as table
  
 app=FastAPI()
 
-def update(file_name,validation): #UPDATES THE LOGS TO THE DATABASE
-    db=duckdb.connect('logs.db')
-    cursor=db.cursor()
-    ret_val={'status':1,'file':validation}
-    if type(validation)==bytes:
-        cursor.execute("insert into logs values(?,?)",(file_name,1))
-    else :
-        cursor.execute("insert into logs values(?,?)",(file_name,validation))
-        ret_val={'status':0,'error':validation}
-    cursor.commit()
-    cursor.close()
-    return ret_val
+table.base.metadata.create_all(bind=db.engine)
+ 
+def update(file_name,validation,db):#UPDATES THE LOGS TO THE DATABASE
+    if type(validation) == bytes:
+        file_log = {
+            'file':validation,
+            'file_name':file_name,
+            
+        }
+        file_log = table.valid_files(**file_log)
+        db.add(file_log)
+        db.commit()
+        return {'status':'file uploaded successfully'}
+    
+    else:
+        return {'error':validation}
  
 @app.post('/validate_Configuration_1')
 async def validate_configuration_1(file : UploadFile=File(...)):
@@ -31,12 +36,6 @@ async def validate_configuration_2(file : UploadFile=File(...)):
     return update(file.filename,validation)
  
 
-@app.get('/get_Logs')
-async def get_logs():
-    db = duckdb.connect('logs.db')
-    cursor = db.cursor()
-    files = validifi.get_logs.get_logs().func(cursor)
-    return {'file':files}
 
    
 
