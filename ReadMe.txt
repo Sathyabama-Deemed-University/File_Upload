@@ -1,9 +1,8 @@
 Note:
-Api return base64 encoded bytes data for excel files
 Default datatype formats:
     int-Int64
     float-Float64
-    Date-Date
+    Date-Utf8
     string-Utf8
     Date format:
     %d - day
