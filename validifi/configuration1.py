@@ -61,16 +61,43 @@ class verify:
         return 1
         
     
+    def date_formate(self,cols):   #EXTRACTS DATE_FORMAT FROM THE FILE
+        d_f=list(zip(*[list(map(int,re.findall(r'[0-9]{1,4}',i)))for i in cols]))
+     
+        formate=[]
+        sep='-'
+        if '/' in cols[0]:sep='/'
+        elif '.' in cols[0]:sep='.'
+
+        for i in d_f:
+            if max(i)<=12:formate.append("%m")
+            elif max(i)>31:formate.append("%Y")
+            elif max(i)<=31:formate.append('%d')
+        formate = [sep.join(formate)]
+        if formate[0].count('%m')>1:
+            formate1 = formate[0].split(sep)
+            i_m = formate1[0].index('%m')
+            i_d =  formate1[0].index('%d')
+            formate1[i_m] = '%d'
+            formate1[i_d] = '%m'
+            formate.append(sep.join(formate1))
+
+        return formate
+
+    
+
+    
     def check_date_format(self): # VALIDATING DATE-FORMAT W.R.T CONFIG FILE
+        
         if len(self.date_time_column) == 0:
             return 1
-        try:
+        else:
             for i in self.date_time_column:
-                self.df = self.df.with_columns(pl.col(i).str.strptime(pl.Date, self.date_format))
-        except Exception:
-            self.error = errors.date_format_e.format(i,self.date_format)
-            return 0
-        return 1
+                
+                if self.date_format not in self.date_formate(self.df[i]):
+                    
+                    return 0
+            return 1
    
     def _column_length(self):  #VALIDATING COLUMN-LENGTH W.R.T CONFIG FILE
         if len(self.df.columns) <= self.column_length:
