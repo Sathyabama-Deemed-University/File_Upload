@@ -3,7 +3,6 @@ import polars as pl
 import io
 from . import config
 from . import errors
-import base64
 import re
 
 class verify:
@@ -194,7 +193,7 @@ class verify:
             temp_pointer=io.BytesIO()
             self.bdata = self.df.to_pandas().to_excel(temp_pointer,index=False)
             temp_pointer.seek(0)
-            self.bdata=base64.encodebytes(temp_pointer.read())
+            self.bdata=temp_pointer.read()
             return 1
         return 0
         
