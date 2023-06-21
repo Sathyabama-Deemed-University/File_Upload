@@ -21,3 +21,5 @@ config:
     xml multivalued column: "multivalued column is not supported"
     xml mutiple tables: "multiple tables is not supported or file is empty"
     empty: "file is empty"
+  database:
+    url: 'postgresql://postgres:kalai12345@localhost/basic'
