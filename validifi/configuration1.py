@@ -3,6 +3,7 @@ import polars as pl
 import io
 from . import config
 from . import errors
+import re
 
 
 class verify:
@@ -95,6 +96,7 @@ class verify:
             for i in self.date_time_column:
                 
                 if self.date_format not in self.date_formate(self.df[i]):
+                    self.error=errors.date_format.format(i,self.date_format)
                     
                     return 0
             return 1
