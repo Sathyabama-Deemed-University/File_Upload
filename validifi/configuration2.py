@@ -105,14 +105,15 @@ class verify:
     
 
     
-    def check_date_format(self): # VALIDATING DATE-FORMAT W.R.T CONFIG FILE
+    def check_date_format(self,list_index=0): # VALIDATING DATE-FORMAT W.R.T CONFIG FILE
         
-        if len(self.date_time_column) == 0:
+        if len(self.date_time_column[list_index]) == 0:
             return 1
         else:
-            for i in self.date_time_column:
+            for i in self.date_time_column[list_index]:
                 
                 if self.date_format not in self.date_formate(self.df[i]):
+                    self.error=errors.date_format(i,self.date_format)
                     
                     return 0
             return 1
