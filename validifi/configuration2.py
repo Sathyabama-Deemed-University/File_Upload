@@ -113,7 +113,7 @@ class verify:
             for i in self.date_time_column[list_index]:
                 
                 if self.date_format not in self.date_formate(self.df[i]):
-                    self.error=errors.date_format(i,self.date_format)
+                    self.error=errors.date_format_e(i,self.date_format)
                     
                     return 0
             return 1
